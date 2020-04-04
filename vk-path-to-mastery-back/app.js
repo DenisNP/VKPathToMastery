@@ -9,8 +9,7 @@ firebase.init();
 
 // requests
 app.get('/test', async (req, res) => {
-    await firebase.save('12345', { hello: 'World!' });
-    res.send('It works!');
+    res.send(JSON.stringify(d));
 });
 
 // start server
