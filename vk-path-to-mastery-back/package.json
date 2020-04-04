@@ -9,6 +9,8 @@
   "author": "Denis Peshekhonov",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "crypto": "^1.0.1",
+    "express": "^4.17.1",
+    "firebase": "^7.13.2"
   }
 }
