@@ -28,6 +28,10 @@ const init = () => {
     firebase.init();
 };
 
+const getUser = async (userId) => {
+    return await firebase.read(userId, defaultState);
+};
+
 const createEditPath = async (userId, data) => {
     const user = await firebase.read(userId, defaultState);
     if (data.first) writePath(data.first, user.paths.first);
@@ -64,23 +68,38 @@ const setDone = async (userId, data) => {
     const newDifference = offset - serverOffset;
 
     date = new Date(date.getTime() + newDifference * 60000);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
 
     let dayOfWeek = date.getDay() - 1;
     if (dayOfWeek < 0) dayOfWeek = 6;
 
     if (!user.paths[pathName].days.includes(dayOfWeek)) return user;
 
+    date = new Date(date.getTime() - newDifference * 60000);
     const timestamp = date.getTime();
-    user.paths[pathName].done.push(timestamp);
+
+    if (!user.paths[pathName].done.includes(timestamp)) user.paths[pathName].done.push(timestamp);
 
     return await firebase.save(userId, user);
 };
 
 const writePath = (newPath, userPath) => {
-    if (!userPath.name || !userPath.icon || !userPath.days || userPath.days.length === 0) return;
+    if (!newPath.name || !newPath.icon || !newPath.days || newPath.days.length === 0) return;
+    if (newPath.name.length > 140 || newPath.icon.length > 1) return;
+    if (!newPath.days.every(checkDay)) return;
+
     userPath.name = newPath.name;
     userPath.icon = newPath.icon;
-    userPath.days = newPath.days;
+    userPath.days = [...new Set(newPath.days)];
+};
+
+const checkDay = (n) => {
+    const parsedNum = Number.parseInt(n);
+    if (Number.isNaN(parsedNum)) return false;
+    return parsedNum >= 0 && parsedNum <= 6;
 };
 
 module.exports = {
@@ -88,4 +107,5 @@ module.exports = {
     createEditPath,
     deletePath,
     setDone,
+    getUser,
 };
