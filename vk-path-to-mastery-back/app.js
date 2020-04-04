@@ -1,11 +1,11 @@
 const PORT = 3000;
 const express = require('express');
-const firebase = require('./firebase');
+const handler = require('./handler');
 
 // create app
 const app = express();
 app.use(express.json());
-firebase.init();
+handler.init();
 
 // requests
 app.get('/test', async (req, res) => {
