@@ -25,6 +25,9 @@ export default {
     components: {
         Calendar,
     },
+    mounted() {
+        this.$store.dispatch('init');
+    },
 };
 </script>
 

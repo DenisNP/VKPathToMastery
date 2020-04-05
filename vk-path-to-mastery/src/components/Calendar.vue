@@ -2,7 +2,7 @@
     <div class="main-calendar">
         <calendar-line
             v-for="line in totalLines"
-            :key="line"
+            :key="line.date"
             :startDate="line.date"
             :totalFirst="line.totalFirst"
         />
@@ -19,16 +19,10 @@ export default {
     },
     computed: {
         minDate() {
-            const date = new Date();
-            date.setDate(date.getDate() - 30);
-
-            return this.toMonday(date).getTime();
+            return this.$store.getters.minTimestamp;
         },
         maxDate() {
-            const date = new Date();
-            date.setDate(date.getDate() + 90);
-
-            return this.toMonday(date).getTime();
+            return this.$store.getters.maxTimestamp;
         },
         totalLines() {
             const dates = [];
@@ -41,17 +35,6 @@ export default {
                 startDate += 7 * 24 * 3600000;
             }
             return dates;
-        },
-    },
-    methods: {
-        toMonday(date) {
-            date.setHours(0, 0, 0, 0);
-
-            let dayOfWeek = date.getDay() - 1;
-            if (dayOfWeek < 0) dayOfWeek = 6;
-
-            date.setDate(date.getDate() - dayOfWeek);
-            return date;
         },
     },
 };

@@ -3,7 +3,7 @@
         <div
             class="calendar-day"
             v-for="day in days"
-            :key="day"
+            :key="day.day"
             :class="{
                 weekend: day.weekend,
                 background: day.evenMonth,
