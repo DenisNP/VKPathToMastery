@@ -54,7 +54,6 @@ export default {
                         && now.getDate() === currentDate.getDate()
                         && now.getFullYear() === currentDate.getFullYear(),
                     first: currentDate.getDate() === 1,
-                    last: i === 6,
                 });
             }
 
@@ -82,9 +81,6 @@ export default {
         },
         isFirstLine() {
             return this.totalFirst || this.days.some((x) => x.first);
-        },
-        isEvenMonth() {
-            return this.getMonth % 2 === 0;
         },
     },
 };
