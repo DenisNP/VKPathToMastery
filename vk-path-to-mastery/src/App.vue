@@ -3,12 +3,15 @@
         <f7-view main class="safe-areas">
             <f7-page>
                 <f7-navbar title="Путь к мастерству"></f7-navbar>
+                <calendar></calendar>
             </f7-page>
         </f7-view>
     </f7-app>
 </template>
 
 <script>
+import Calendar from './components/Calendar.vue';
+
 export default {
     data() {
         return {
@@ -18,6 +21,9 @@ export default {
                 id: 'net.denisnp.pathtomastery',
             },
         };
+    },
+    components: {
+        Calendar,
     },
 };
 </script>
