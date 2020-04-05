@@ -1,22 +1,13 @@
 <template>
     <div class="calendar-line">
-        <div
-            class="calendar-day"
+        <calendar-day
             v-for="day in days"
             :key="day.day"
-            :class="{
-                weekend: day.weekend,
-                background: day.evenMonth,
-                'back-alt': !day.evenMonth,
-                today: day.today,
-                first: day.first,
-            }"
-        >
-            {{day.day}}
-        </div>
+            :day="day"
+        />
         <div
             class="right-block"
-            :class="{background: days[6].evenMonth, 'back-alt': !days[6].evenMonth}"
+            :class="{'c-day-back': days[6].evenMonth, 'c-day-back-alt': !days[6].evenMonth}"
         />
         <div v-if="isFirstLine" class="month-name-container">
             <div class="month-name">{{monthName}}</div>
@@ -25,6 +16,8 @@
 </template>
 
 <script>
+import CalendarDay from './CalendarDay.vue';
+
 export default {
     name: 'CalendarLine.vue',
     props: {
@@ -45,6 +38,7 @@ export default {
             for (let i = 0; i < 7; i++) {
                 const currentDate = new Date(this.startDate);
                 currentDate.setDate(currentDate.getDate() + i);
+                const currentTimestamp = currentDate.getTime();
 
                 days.push({
                     day: currentDate.getDate(),
@@ -54,6 +48,8 @@ export default {
                         && now.getDate() === currentDate.getDate()
                         && now.getFullYear() === currentDate.getFullYear(),
                     first: currentDate.getDate() === 1,
+                    done: this.$store.getters.allDone.has(currentTimestamp),
+                    end: this.$store.getters.endDone.has(currentTimestamp),
                 });
             }
 
@@ -83,6 +79,9 @@ export default {
             return this.totalFirst || this.days.some((x) => x.first);
         },
     },
+    components: {
+        CalendarDay,
+    },
 };
 </script>
 
@@ -91,36 +90,6 @@ export default {
     .calendar-line {
         width: 100vw;
         display: flex;
-    }
-
-    .calendar-day {
-        margin-top: 4.3px;
-        height: calc(15vw - 4.3px);
-        font-size: 17px;
-        font-weight: 600;
-        color: rgba(53, 20, 0, 0.54);
-    }
-
-    .background {
-        background-color: rgba(255, 220, 192, 0.26);
-    }
-
-    .back-alt {
-        background-color: rgba(199, 88, 0, 0.11);
-        color: rgba(53, 20, 0, 0.66);
-    }
-
-    .weekend {
-        color: var(--f7-theme-color-shade);
-    }
-
-    .first {
-        border-left: 2px solid #867865a8;
-    }
-
-    .today {
-        font-weight: bold;
-        border: 2px solid var(--f7-theme-color);
     }
 
     .right-block {
