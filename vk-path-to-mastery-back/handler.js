@@ -8,6 +8,7 @@ const defaultState = {
             color: 0,
             days: [],
             done: [],
+            nextCheckpoint: 0,
         },
         second: {
             name: '',
@@ -15,6 +16,7 @@ const defaultState = {
             color: 0,
             days: [],
             done: [],
+            nextCheckpoint: 0,
         },
         third: {
             name: '',
@@ -22,8 +24,10 @@ const defaultState = {
             color: 0,
             days: [],
             done: [],
+            nextCheckpoint: 0,
         },
     },
+    nextDone: 0,
     archive: [],
 };
 
@@ -105,10 +109,21 @@ const setDone = async (userId, data) => {
 
         // modify done object
         if (!dontBreak) {
-            newDone.broken = true;
+            newDone.start = true;
         }
+    } else {
+        newDone.start = true;
     }
+
     done.push(newDone);
+    user.nextDone = toDayOf(date.getTime() + 24 * 3600000) - newDifference;
+
+    // checkpoint
+    const [cpId, nextCheckpoint] = getCheckpointId(user.paths[pathName], userDate);
+    if (cpId > 0) {
+        newDone.checkpoint = cpId;
+    }
+    user.paths[pathName].nextCheckpoint = nextCheckpoint;
 
     return await firebase.save(userId, user);
 };
@@ -136,6 +151,138 @@ const dayOfWeek = (date) => {
     let dayOfWeek = date.getDay() - 1;
     return dayOfWeek < 0 ? 6 : dayOfWeek;
 };
+
+const getCheckpointId = (path, date, difference) => {
+    if (path.done.length === 0) return [-1, 0];
+    let startDay = null;
+    for (let index = path.done.length - 1; index >= 0; index--) {
+        if (path.done[index].start) {
+            startDay = path.done[index];
+            break;
+        }
+    }
+
+    if (startDay === null) return [-1, 0];
+    const daysDifference = Math.floor((date.getTime() - startDay.ts) / (24 * 3600000));
+    const checkpointsGot = new Set(path.done.filter(d => d.checkpoint > 0).map(d => d.checkpoint));
+
+    const daysCount = path.days.length;
+    let checkpointIndex = checkpoints.findIndex(
+      cp => !checkpointsGot.has(cp.id)
+        && cp.daysNeed.includes(daysCount)
+    );
+
+    if (checkpointIndex === -1) {
+        return [-1, 0];
+    }
+
+    let checkpoint = checkpoints[checkpointIndex];
+    let checkpointId = -1;
+    if (checkpoint.daysDone <= daysDifference) {
+        checkpointId = checkpoint.id;
+        checkpointIndex++;
+        if (checkpointIndex > checkpoints.length - 1) {
+            return [checkpointId, 0];
+        }
+        checkpoint = checkpoints[checkpointIndex];
+    }
+
+    // find next checkpoint
+    let nextDone = startDay.ts + 24 * 3600000 * checkpoint.daysDone + difference;
+    nextDone = toDayOf(path.days, nextDone) - difference;
+
+    return [checkpointId, nextDone];
+};
+
+const toDayOf = (days, timestamp) => {
+    const date = new Date(timestamp);
+    const dow = dayOfWeek(date);
+    let closestNext = days.find(d => d >= dow);
+    if (closestNext === undefined) {
+       closestNext = days[0];
+    }
+
+    if (closestNext < dow) closestNext += 7;
+    return timestamp + 24 * 3600000 * (closestNext - dow);
+};
+
+const checkpoints = [
+    {
+        id: 1,
+        daysNeed: [7],
+        daysDone: 3,
+    },
+    {
+        id: 2,
+        daysNeed: [7, 6, 5],
+        daysDone: 7,
+    },
+    {
+        id: 3,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 14,
+    },
+    {
+        id: 4,
+        daysNeed: [6, 5, 4, 3, 2, 1],
+        daysDone: 21,
+    },
+    {
+        id: 5,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 30,
+    },
+    {
+        id: 6,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 45,
+    },
+    {
+        id: 7,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 60,
+    },
+    {
+        id: 8,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 90,
+    },
+    {
+        id: 9,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 120,
+    },
+    {
+        id: 10,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 150,
+    },
+    {
+        id: 11,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 180,
+    },
+    {
+        id: 12,
+        daysNeed: [4, 3, 2, 1],
+        daysDone: 210,
+    },
+    {
+        id: 13,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 240,
+    },
+    {
+        id: 14,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 300,
+    },
+    {
+        id: 15,
+        daysNeed: [7, 6, 5, 4, 3, 2, 1],
+        daysDone: 365,
+    }
+];
 
 module.exports = {
     init,
