@@ -10,51 +10,51 @@
             }"
     >
         <div class="day-text">{{day.day}}</div>
-        <div class="container">
+        <div v-if="day.paths.first.done" class="container">
             <div class="sub-container">
                 <div class="icon first-done"></div>
             </div>
         </div>
-        <div class="container">
+        <div v-if="day.paths.first.prev" class="container">
             <div class="sub-container">
                 <div class="icon first-line-back"></div>
             </div>
         </div>
-        <div class="container">
+        <div v-if="day.paths.first.next" class="container">
             <div class="sub-container">
                 <div class="icon first-line-next"></div>
             </div>
         </div>
-<!--        <div class="container">-->
-<!--            <div class="sub-container">-->
-<!--                <div class="icon second-done"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="container">-->
-<!--            <div class="sub-container">-->
-<!--                <div class="icon second-line-back"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="container">-->
-<!--            <div class="sub-container">-->
-<!--                <div class="icon second-line-next"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="container">-->
-<!--            <div class="sub-container">-->
-<!--                <div class="icon third-done"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="container">-->
-<!--            <div class="sub-container">-->
-<!--                <div class="icon third-line-back"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="container">-->
-<!--            <div class="sub-container">-->
-<!--                <div class="icon third-line-next"></div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <div v-if="day.paths.second.done" class="container">
+            <div class="sub-container">
+                <div class="icon second-done"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.second.prev" class="container">
+            <div class="sub-container">
+                <div class="icon second-line-back"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.second.next" class="container">
+            <div class="sub-container">
+                <div class="icon second-line-next"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.third.done" class="container">
+            <div class="sub-container">
+                <div class="icon third-done"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.third.prev" class="container">
+            <div class="sub-container">
+                <div class="icon third-line-back"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.third.next" class="container">
+            <div class="sub-container">
+                <div class="icon third-line-next"></div>
+            </div>
+        </div>
     </div>
 </template>
 
