@@ -9,7 +9,52 @@
                 first: day.first,
             }"
     >
-        {{day.day}}
+        <div class="day-text">{{day.day}}</div>
+        <div v-if="day.paths.first.done" class="container">
+            <div class="sub-container">
+                <div class="icon first-done"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.first.prev" class="container">
+            <div class="sub-container">
+                <div class="icon first-line-back"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.first.next" class="container">
+            <div class="sub-container">
+                <div class="icon first-line-next"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.second.done" class="container">
+            <div class="sub-container">
+                <div class="icon second-done"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.second.prev" class="container">
+            <div class="sub-container">
+                <div class="icon second-line-back"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.second.next" class="container">
+            <div class="sub-container">
+                <div class="icon second-line-next"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.third.done" class="container">
+            <div class="sub-container">
+                <div class="icon third-done"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.third.prev" class="container">
+            <div class="sub-container">
+                <div class="icon third-line-back"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.third.next" class="container">
+            <div class="sub-container">
+                <div class="icon third-line-next"></div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -45,6 +90,77 @@ export default {
         font-size: 17px;
         font-weight: 600;
         color: rgba(53, 20, 0, 0.54);
+    }
+
+    .day-text {
+        width: 20px;
+    }
+
+    .container {
+        width: 0;
+        height: 0;
+        overflow: visible;
+    }
+
+    .sub-container {
+        width: 14vw;
+        overflow: hidden;
+        transform: translate(calc(-10px - 50%), -50%);
+    }
+
+    .icon {
+        background-image: url("~@/assets/strip_00000.png");
+        background-size: 180vw 15vw;
+        width: 180vw;
+        height: 15vw;
+    }
+
+    .first-done {
+        background-position: -0.5vw 0;
+    }
+
+    .second-done {
+        background-position: -15.5vw 0;
+    }
+
+    .third-done {
+        background-position: -30.5vw 0;
+    }
+
+    .first-line-back {
+        background-position: -45.5vw 0;
+    }
+
+    .first-line-next {
+        background-position: -60.5vw 0;
+    }
+
+    .second-line-back {
+        background-position: -75.5vw 0;
+    }
+
+    .second-line-next {
+        background-position: -90.5vw 0;
+    }
+
+    .third-line-back {
+        background-position: -105.5vw 0;
+    }
+
+    .third-line-next {
+        background-position: -120.5vw 0;
+    }
+
+    .first-milestone {
+        background-position: -135.5vw 0;
+    }
+
+    .second-milestone {
+        background-position: -150.5vw 0;
+    }
+
+    .third-milestone {
+        background-position: -165.5vw 0;
     }
 
     .weekend {

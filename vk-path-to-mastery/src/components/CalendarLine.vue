@@ -21,42 +21,22 @@ import CalendarDay from './CalendarDay.vue';
 export default {
     name: 'CalendarLine.vue',
     props: {
-        startDate: {
+        lineNumber: {
             type: Number,
-            required: true,
-        },
-        totalFirst: {
-            type: Boolean,
             required: true,
         },
     },
     computed: {
         days() {
             const days = [];
-            const now = new Date();
-
             for (let i = 0; i < 7; i++) {
-                const currentDate = new Date(this.startDate);
-                currentDate.setDate(currentDate.getDate() + i);
-                const currentTimestamp = currentDate.getTime();
-
-                days.push({
-                    day: currentDate.getDate(),
-                    weekend: i >= 5,
-                    evenMonth: currentDate.getMonth() % 2 === 0,
-                    today: now.getMonth() === currentDate.getMonth()
-                        && now.getDate() === currentDate.getDate()
-                        && now.getFullYear() === currentDate.getFullYear(),
-                    first: currentDate.getDate() === 1,
-                    done: this.$store.getters.allDone.has(currentTimestamp),
-                    end: this.$store.getters.endDone.has(currentTimestamp),
-                });
+                days.push(this.$store.getters.allDays[this.lineNumber * 7 + i]);
             }
 
             return days;
         },
         getMonth() {
-            return (new Date(this.startDate + 7 * 24 * 3600000)).getMonth();
+            return (new Date(this.days[6].timestamp)).getMonth();
         },
         monthName() {
             const months = [
@@ -76,7 +56,7 @@ export default {
             return months[this.getMonth];
         },
         isFirstLine() {
-            return this.totalFirst || this.days.some((x) => x.first);
+            return this.lineNumber === 0 || this.days.some((x) => x.first);
         },
     },
     components: {
@@ -93,7 +73,7 @@ export default {
     }
 
     .right-block {
-        width: 20px;
+        width: 5vw;
         margin-top: 4.3px;
         height: calc(15vw - 4.3px);
     }
