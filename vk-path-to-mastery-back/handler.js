@@ -87,24 +87,26 @@ const setDone = async (userId, data) => {
     // add new timestamp
     const done = user.paths[pathName].done;
     const prevTs = done.length > 0 ? done[done.length - 1] : null;
-    if (prevTs !== null && prevTs.ts >= userTimestamp) return user;
-
-    const prevDate = new Date(prevTs.ts + newDifference);
-    const prevDow = dayOfWeek(prevDate);
-
-    // check if days in chain
-    const prevIndex = days.indexOf(prevDow);
-    const nextIndex = days.indexOf(dow);
-    const dontBreak = prevIndex === nextIndex - 1 || (prevIndex === days.length - 1 && nextIndex === 0);
-
-    if (userTimestamp - prevTs.ts > 7 * 24 * 3600000) return user;
-
-    // create new done object
     const newDone = {
         ts: userTimestamp,
     };
-    if (!dontBreak) {
-        newDone.broken = true;
+
+    if (prevTs !== null) {
+        if (prevTs.ts >= userTimestamp) return user;
+
+        const prevDate = new Date(prevTs.ts + newDifference);
+        const prevDow = dayOfWeek(prevDate);
+
+        // check if days in chain
+        const prevIndex = days.indexOf(prevDow);
+        const nextIndex = days.indexOf(dow);
+        const dontBreak = (prevIndex === nextIndex - 1 || (prevIndex === days.length - 1 && nextIndex === 0))
+          && userTimestamp - prevTs.ts <= 7 * 24 * 3600000;
+
+        // modify done object
+        if (!dontBreak) {
+            newDone.broken = true;
+        }
     }
     done.push(newDone);
 
