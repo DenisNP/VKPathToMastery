@@ -116,13 +116,14 @@ const setDone = async (userId, data) => {
     }
 
     done.push(newDone);
-    user.nextDone = toDayOf(date.getTime() + 24 * 3600000) - newDifference;
+    user.nextDone = toDayOf(user.paths[pathName].days, date.getTime() + 24 * 3600000) - newDifference;
 
     // checkpoint
-    const [cpId, nextCheckpoint] = getCheckpointId(user.paths[pathName], userDate);
+    const [cpId, nextCheckpoint] = getCheckpointId(user.paths[pathName], userDate, newDifference);
     if (cpId > 0) {
         newDone.checkpoint = cpId;
     }
+
     user.paths[pathName].nextCheckpoint = nextCheckpoint;
 
     return await firebase.save(userId, user);
