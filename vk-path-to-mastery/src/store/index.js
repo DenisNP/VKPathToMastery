@@ -68,7 +68,6 @@ export default new Vuex.Store({
             for (let day = getters.minTimestamp; day < getters.maxTimestamp; day += 24 * 3600000) {
                 const currentDate = new Date(day);
                 const dayObject = {
-                    timestamp: currentDate.getTime(),
                     day: currentDate.getDate(),
                     weekend: currentDate.getDay() === 0 || currentDate.getDay() === 6,
                     evenMonth: currentDate.getMonth() % 2 === 0,
@@ -76,6 +75,7 @@ export default new Vuex.Store({
                         && now.getDate() === currentDate.getDate()
                         && now.getFullYear() === currentDate.getFullYear(),
                     first: currentDate.getDate() === 1,
+                    timestamp: day,
                 };
                 days.push(dayObject);
             }
