@@ -14,59 +14,6 @@ const toMonday = (timestamp) => {
     return date.getTime();
 };
 
-const inWeek = (t1, t2) => Math.abs(t1 - t2) <= 7 * 24 * 3600000;
-
-const matchingDay = (path, prevTimestamp, nextTimestamp) => {
-    const days = path.days.sort();
-    let prevDay = (new Date(prevTimestamp)).getDay() - 1;
-    if (prevDay < 0) prevDay = 6;
-    let nextDay = (new Date(nextTimestamp)).getDay() - 1;
-    if (nextDay < 0) nextDay = 6;
-
-    const prevIndex = days.indexOf(prevDay);
-    if (prevIndex === -1) return false;
-    const nextIndex = days.indexOf(nextDay);
-    if (nextIndex === -1) return false;
-
-    return prevIndex === nextIndex - 1 || (prevIndex === days.length - 1 && nextIndex === 0);
-};
-
-const getDayObject = (paths, timestamp) => {
-    const day = {};
-    Object.entries(paths).forEach(([pathName, path]) => {
-        day[pathName] = {
-            done: false,
-            prev: false,
-            next: false,
-        };
-
-        const index = path.done.findIndex((t) => t >= timestamp);
-        if (index !== -1) {
-            let nextTimestamp = path.done[index];
-            let prevTimestamp = index > 0 ? path.done[index - 1] : 0;
-
-            if (prevTimestamp !== 0) {
-                day[pathName].prev = inWeek(prevTimestamp, nextTimestamp)
-                    && matchingDay(path, prevTimestamp, nextTimestamp);
-            }
-
-            if (nextTimestamp === timestamp) {
-                // element by itself is in 'done'
-                day[pathName].done = true;
-                nextTimestamp = path.done.length > index + 1 ? path.done[index + 1] : 0;
-                prevTimestamp = timestamp;
-            }
-
-            if (nextTimestamp !== 0) {
-                day[pathName].next = inWeek(prevTimestamp, nextTimestamp)
-                    && matchingDay(path, prevTimestamp, nextTimestamp);
-            }
-        }
-    });
-
-    return day;
-};
-
 export default new Vuex.Store({
     state: {
         user: {
@@ -121,7 +68,6 @@ export default new Vuex.Store({
             for (let day = getters.minTimestamp; day < getters.maxTimestamp; day += 24 * 3600000) {
                 const currentDate = new Date(day);
                 const dayObject = {
-                    paths: getDayObject(state.user.paths, day),
                     timestamp: currentDate.getTime(),
                     day: currentDate.getDate(),
                     weekend: currentDate.getDay() === 0 || currentDate.getDay() === 6,
