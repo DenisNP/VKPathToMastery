@@ -131,7 +131,7 @@ const setDone = async (userId, data) => {
 
 const writePath = (newPath, userPath) => {
     if (!newPath.name || !newPath.icon || !newPath.days || newPath.days.length === 0) return;
-    if (newPath.name.length > 140 || newPath.icon.length > 1) return;
+    if (newPath.name.length > 30 || newPath.icon.length > 7) return;
     if (!newPath.days.every(checkDay)) return;
     const newColor = Number.parseInt(newPath.color);
     if (Number.isNaN(newColor) || newColor < 0 || newColor > 360) return;

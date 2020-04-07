@@ -1,5 +1,6 @@
 <template>
     <div
+        ref="scrollDay"
         class="calendar-day"
         :class="{
                 weekend: day.weekend,
@@ -66,6 +67,13 @@ export default {
             type: Object,
             required: true,
         },
+    },
+    mounted() {
+        if (this.day.aWeekAgo) {
+            this.$nextTick(() => {
+                this.$refs.scrollDay.scrollIntoView();
+            });
+        }
     },
 };
 </script>

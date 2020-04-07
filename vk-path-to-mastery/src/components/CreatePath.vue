@@ -15,12 +15,9 @@
                     label="Иконка"
                     type="text"
                     info="Эмодзи или другой символ"
-                    validate
-                    pattern="."
-                    error-message="Только один символ!"
                     class="margin-bottom"
                     :value="icon"
-                    @input="icon = $event.target.value"
+                    @input="(e) => filter(e.target.value)"
                 />
                 <f7-list-input
                     label="Название"
@@ -40,9 +37,9 @@
                             v-for="(dayName, day) in ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']"
                             :key="dayName"
                             class="day-btn"
-                            :outline="!days.includes(day + 1)"
-                            :fill="days.includes(day + 1)"
-                            @click="() => toggleDay(day + 1)"
+                            :outline="!days.includes(day)"
+                            :fill="days.includes(day)"
+                            @click="() => toggleDay(day)"
                         >{{dayName}}</f7-button>
                     </div>
                 </f7-list-item>
@@ -89,6 +86,7 @@ export default {
             days: [],
             name: '',
             icon: '',
+            oldIcon: '',
         };
     },
     computed: {
@@ -113,6 +111,30 @@ export default {
                 this.days.splice(idx, 1);
             }
         },
+        fancyCount(str) {
+            const joiner = '\u{200D}';
+            const split = str.split(joiner);
+            let count = 0;
+
+            // eslint-disable-next-line no-restricted-syntax
+            for (const s of split) {
+                // removing the variation selectors
+                const num = Array.from(s.split(/[\ufe00-\ufe0f]/).join('')).length;
+                count += num;
+            }
+
+            // assuming the joiners are used appropriately
+            return Math.floor(count / split.length);
+        },
+        filter(icon) {
+            const len = this.fancyCount(icon);
+            if (len <= 1) {
+                this.icon = icon;
+                this.oldIcon = icon;
+            } else {
+                this.icon = this.oldIcon;
+            }
+        },
     },
     mounted() {
         const path = this.$store.state.user.paths[this.pathName];
@@ -120,6 +142,7 @@ export default {
         this.color = path.color;
         this.name = path.name;
         this.icon = path.icon || '🥋';
+        this.oldIcon = this.icon;
     },
     props: {
         pathName: {
