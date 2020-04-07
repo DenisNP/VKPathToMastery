@@ -60,6 +60,8 @@
 </template>
 
 <script>
+import EventBus from '../event-bus';
+
 export default {
     name: 'CalendarDay.vue',
     props: {
@@ -68,12 +70,16 @@ export default {
             required: true,
         },
     },
-    mounted() {
-        if (this.day.aWeekAgo) {
+    methods: {
+        scroll() {
+            if (!this.day.aWeekAgo) return;
             this.$nextTick(() => {
                 this.$refs.scrollDay.scrollIntoView();
             });
-        }
+        },
+    },
+    mounted() {
+        EventBus.$on('scroll', this.scroll);
     },
 };
 </script>

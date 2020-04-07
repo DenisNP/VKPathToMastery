@@ -1,10 +1,12 @@
 const PORT = 3000;
 const express = require('express');
+const cors = require('cors');
 const handler = require('./handler');
 
 // create app
 const app = express();
 app.use(express.json());
+app.use(cors());
 handler.init();
 
 // requests

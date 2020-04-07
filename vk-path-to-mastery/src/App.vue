@@ -7,6 +7,7 @@
 <script>
 import Calendar from './components/Calendar.vue';
 import CreatePath from './components/CreatePath.vue';
+import EventBus from './event-bus';
 
 export default {
     data() {
@@ -28,8 +29,12 @@ export default {
             },
         };
     },
-    mounted() {
-        this.$store.dispatch('init');
+    async mounted() {
+        window.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+        await this.$store.dispatch('init');
+        this.$nextTick(() => {
+            EventBus.$emit('scroll');
+        });
     },
 };
 </script>
@@ -51,5 +56,6 @@ export default {
         --f7-label-font-size: 14px;
         --f7-list-item-title-font-size: var(--f7-label-font-size);
         --f7-block-margin-vertical: 30px;
+        --f7-dialog-button-text-color: #5f0909;
     }
 </style>

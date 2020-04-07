@@ -60,14 +60,21 @@
                     ></f7-range>
                 </f7-list-item>
                 <f7-block class="end-block">
-                    <f7-button class="end-button margin-bottom" large fill>
+                    <f7-button
+                        class="end-button margin-bottom"
+                        :class="{disabled: buttonsDisabled}"
+                        large
+                        fill
+                        @click="createEditPath">
                         {{isCreating ? 'Начать Путь' : 'Сохранить'}}
                     </f7-button>
                     <f7-button
                         v-if="!isCreating"
                         class="end-button"
+                        :class="{disabled: buttonsDisabled}"
                         large
                         style="background-color: #ffffff99;"
+                        @click="deletePath"
                     >
                         Завершить Путь
                     </f7-button>
@@ -90,13 +97,19 @@ export default {
         };
     },
     computed: {
+        path() {
+            return this.$store.state.user.paths[this.pathName];
+        },
         isCreating() {
-            return !this.name;
+            return !this.path.name;
         },
         title() {
             return this.isCreating
                 ? 'Здесь вы создаете новое занятие, выполнение которого будете отслеживать'
-                : `Изменить данные для Пути «${this.$store.state.user.paths[this.pathName].name}»`;
+                : `Изменить данные для Пути «${this.path.name}»`;
+        },
+        buttonsDisabled() {
+            return !this.name || this.days.length === 0 || !this.icon;
         },
     },
     methods: {
@@ -134,6 +147,47 @@ export default {
             } else {
                 this.icon = this.oldIcon;
             }
+        },
+        async createEditPath() {
+            if (this.buttonsDisabled) return;
+
+            const data = {};
+            data[this.pathName] = {
+                color: this.color,
+                days: this.days,
+                name: this.name,
+                icon: this.icon,
+            };
+            await this.$store.dispatch('createEditPath', data);
+            this.$f7.views.main.router.back();
+        },
+        deletePath() {
+            if (this.buttonsDisabled) return;
+
+            this.$f7.dialog.create({
+                title: this.path.name,
+                text: 'Вы достигли цели вашего Пути?',
+                buttons: [
+                    {
+                        text: 'Я успешно прошёл Путь',
+                        onClick: () => this.deletePathConfirm(true),
+                    },
+                    {
+                        text: 'Просто удалить Путь',
+                        onClick: () => this.deletePathConfirm(false),
+                    },
+                    {
+                        text: 'Отмена',
+                        close: true,
+                        color: 'red',
+                    },
+                ],
+                verticalButtons: true,
+            }).open();
+        },
+        async deletePathConfirm(archive) {
+            await this.$store.dispatch('deletePath', { pathName: this.pathName, archive });
+            this.$f7.views.main.router.back();
         },
     },
     mounted() {
@@ -198,6 +252,10 @@ export default {
 
     .margin-bottom {
         margin-bottom: 12px;
+    }
+
+    .disabled {
+        opacity: 0.5;
     }
 
     .color-show {
