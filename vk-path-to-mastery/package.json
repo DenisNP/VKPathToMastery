@@ -10,6 +10,7 @@
   "dependencies": {
     "core-js": "^3.6.4",
     "framework7": "^5.5.4",
+    "framework7-icons": "^3.0.0",
     "framework7-vue": "^5.5.4",
     "vue": "^2.6.11",
     "vue-router": "^3.1.6",

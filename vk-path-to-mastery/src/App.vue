@@ -1,16 +1,12 @@
 <template>
     <f7-app :params="f7params">
-        <f7-view main class="safe-areas">
-            <f7-page>
-                <f7-navbar title="Путь к мастерству"></f7-navbar>
-                <calendar></calendar>
-            </f7-page>
-        </f7-view>
+        <f7-view :push-state="true" main url="/" class="safe-areas"/>
     </f7-app>
 </template>
 
 <script>
 import Calendar from './components/Calendar.vue';
+import CreatePath from './components/CreatePath.vue';
 
 export default {
     data() {
@@ -19,11 +15,18 @@ export default {
                 theme: 'auto',
                 name: 'Путь к мастерству',
                 id: 'net.denisnp.pathtomastery',
+                routes: [
+                    {
+                        path: '/',
+                        component: Calendar,
+                    },
+                    {
+                        path: '/path/:pathName',
+                        component: CreatePath,
+                    },
+                ],
             },
         };
-    },
-    components: {
-        Calendar,
     },
     mounted() {
         this.$store.dispatch('init');
@@ -42,5 +45,11 @@ export default {
         --f7-bars-translucent-opacity: 0.9;
         --f7-bars-text-color: #ffde00;
         --f7-bars-link-color: #ffde00;
+
+        --f7-list-bg-color: rgba(255, 255, 255, 0.85);
+        --f7-input-info-text-color: rgba(0, 0, 0, 0.25);
+        --f7-label-font-size: 14px;
+        --f7-list-item-title-font-size: var(--f7-label-font-size);
+        --f7-block-margin-vertical: 30px;
     }
 </style>
