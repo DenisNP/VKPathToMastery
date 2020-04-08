@@ -48,7 +48,7 @@ const init = () => {
 };
 
 const getUser = async (userId) => {
-    return await firebase.read(userId, defaultState);
+    return await firebase.read(userId, Object.assign({}, defaultState));
 };
 
 const createEditPath = async (userId, data) => {
