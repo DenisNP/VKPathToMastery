@@ -1,10 +1,6 @@
 <template>
     <f7-page>
-        <f7-navbar title="Путь к мастерству">
-            <f7-nav-left>
-                <f7-link @click="openSettings" icon-f7="multiply"/>
-            </f7-nav-left>
-        </f7-navbar>
+        <f7-navbar title="Путь к мастерству" @click.native="openSettings"></f7-navbar>
         <div class="bar"><img src="~@/assets/bar.jpg"/></div>
         <div class="calendar-container">
             <div class="main-calendar">
