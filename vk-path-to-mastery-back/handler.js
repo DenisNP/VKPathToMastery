@@ -48,11 +48,11 @@ const init = () => {
 };
 
 const getUser = async (userId) => {
-    return await firebase.read(userId, Object.assign({}, defaultState));
+    return await firebase.read(userId, JSON.parse(JSON.stringify(defaultState)));
 };
 
 const createEditPath = async (userId, data) => {
-    const user = await firebase.read(userId, defaultState);
+    const user = await firebase.read(userId, JSON.parse(JSON.stringify(defaultState)));
     if (data.first) writePath(data.first, user.paths.first);
     if (data.second) writePath(data.second, user.paths.second);
     if (data.third) writePath(data.third, user.paths.third);
@@ -61,7 +61,7 @@ const createEditPath = async (userId, data) => {
 };
 
 const deletePath = async (userId, data) => {
-    const user = await firebase.read(userId, defaultState);
+    const user = await firebase.read(userId, JSON.parse(JSON.stringify(defaultState)));
     const { pathName } = data;
     if (!Object.prototype.hasOwnProperty.call(user.paths, pathName)) return user;
 
@@ -69,19 +69,19 @@ const deletePath = async (userId, data) => {
         user.archive.push(user.paths[pathName]);
     }
 
-    user.paths[pathName] = Object.assign({}, defaultState.paths.first);
+    user.paths[pathName] = Object.assign({}, Object.assign({}, defaultState).paths.first);
     return await firebase.save(userId, user);
 };
 
 const setDone = async (userId, data) => {
-    const user = await firebase.read(userId, defaultState);
+    const user = await firebase.read(userId, JSON.parse(JSON.stringify(defaultState)));
     const { pathName, timezoneOffset } = data;
     const newUser = setDoneForUser(user, pathName, timezoneOffset);
     return await firebase.save(userId, newUser);
 };
 
 const generateDemo = async (userId, data) => {
-    const user = await firebase.read(userId, defaultState);
+    const user = await firebase.read(userId, JSON.parse(JSON.stringify(defaultState)));
     const newUser = generateDemoForUser(user, data.timezoneOffset);
     return await firebase.save(userId, newUser);
 };
@@ -98,7 +98,7 @@ const generateDemoForUser = (user, timezoneOffset) => {
     let dow = dayOfWeek(date);
 
     // first path create
-    user.paths.first = Object.assign({}, defaultState.paths.first);
+    user.paths.first = Object.assign({}, Object.assign({}, defaultState).paths.first);
     writePath({ name: 'Езда на велосипеде', icon: '🚴‍♂️', days: [0,1,2,3,4,5,6], color: 0 }, user.paths.first);
     const now = (new Date()).getTime();
     const startFirst = now - 30 * 24 * 3600000;
@@ -108,7 +108,7 @@ const generateDemoForUser = (user, timezoneOffset) => {
 
     // second path create
     const daysSecond = dow === 4 ? [1,3] : [2,4];
-    user.paths.second = Object.assign({}, defaultState.paths.second);
+    user.paths.second = Object.assign({}, Object.assign({}, defaultState).paths.second);
     writePath({ name: 'Игра на гитаре', icon: '🎸', days: daysSecond, color: 77 }, user.paths.second);
     const startSecond = now - 21 * 24 * 3600000;
     let counter = 0;
