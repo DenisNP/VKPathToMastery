@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import bridge from '@vkontakte/vk-bridge';
 import { numPhrase } from '../utils';
 
 export default {
@@ -184,7 +185,17 @@ export default {
             context.font = 'bold 34px Arial';
             context.fillText(`${cpDays} ${numPhrase(cpDays, 'день', 'дня', 'дней')} непрерывно!`, canvas.width / 2, 220);
 
-            // const imageData = canvas.toDataURL();
+            const imageData = canvas.toDataURL();
+            bridge.send('VKWebAppShowStoryBox', {
+                background_type: 'none',
+                stickers: [{
+                    sticker_type: 'renderable',
+                    sticker: {
+                        content_type: 'image',
+                        blob: imageData,
+                    },
+                }],
+            });
         },
     },
 };

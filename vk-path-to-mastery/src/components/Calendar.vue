@@ -1,6 +1,10 @@
 <template>
     <f7-page>
-        <f7-navbar title="Путь к мастерству"></f7-navbar>
+        <f7-navbar title="Путь к мастерству">
+            <f7-nav-left>
+                <f7-link @click="openSettings" icon-f7="multiply"/>
+            </f7-nav-left>
+        </f7-navbar>
         <div class="bar"><img src="~@/assets/bar.jpg"/></div>
         <div class="calendar-container">
             <div class="main-calendar">
@@ -20,6 +24,7 @@
 </template>
 
 <script>
+import bridge from '@vkontakte/vk-bridge';
 import CalendarLine from './CalendarLine.vue';
 import Gong from './Gong.vue';
 
@@ -28,6 +33,38 @@ export default {
     components: {
         CalendarLine,
         Gong,
+    },
+    methods: {
+        openSettings() {
+            this.$f7.dialog.create({
+                title: 'Дополнительно',
+                buttons: [
+                    {
+                        text: 'Включить уведомления',
+                        onClick: () => this.onNotifications(),
+                    },
+                    {
+                        text: 'Выключить уведомления',
+                        onClick: () => this.offNotifications(),
+                    },
+                    {
+                        text: 'Загрузить демо данные',
+                        onClick: () => this.loadDemo(),
+                    },
+                ],
+                verticalButtons: true,
+                closeByBackdropClick: true,
+            }).open();
+        },
+        onNotifications() {
+            bridge.send('VKWebAppAllowNotifications', {});
+        },
+        offNotifications() {
+            bridge.send('VKWebAppDenyNotifications', {});
+        },
+        loadDemo() {
+            this.$store.dispatch('loadDemo');
+        },
     },
     computed: {
         totalLines() {

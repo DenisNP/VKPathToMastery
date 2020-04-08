@@ -267,5 +267,12 @@ export default new Vuex.Store({
             commit('setLoading', false);
             commit('setUserData', response);
         },
+        async loadDemo({ state, commit }) {
+            const timezoneOffset = -1 * (new Date()).getTimezoneOffset();
+            commit('setLoading', true);
+            const response = await api('generateDemo', state.user.userId, { timezoneOffset });
+            commit('setLoading', false);
+            commit('setUserData', response);
+        },
     },
 });
