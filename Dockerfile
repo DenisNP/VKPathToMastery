@@ -9,9 +9,10 @@ RUN npm run build
 FROM node:10
 COPY --from=BUILD_CLIENT /app/dist /app/dist
 COPY ./vk-path-to-mastery-back /app
+
+WORKDIR /app
 RUN npm install
 
 # run
-WORKDIR /app
 EXPOSE 3000
 ENTRYPOINT ["node", "app.js"]
