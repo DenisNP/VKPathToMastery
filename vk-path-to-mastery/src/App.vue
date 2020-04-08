@@ -5,10 +5,10 @@
 </template>
 
 <script>
+import bridge from '@vkontakte/vk-bridge';
 import Calendar from './components/Calendar.vue';
 import CreatePath from './components/CreatePath.vue';
 import EventBus from './event-bus';
-import bridge from '@vkontakte/vk-bridge';
 
 export default {
     data() {
