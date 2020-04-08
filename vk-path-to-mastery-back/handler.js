@@ -8,7 +8,11 @@ const defaultState = {
             color: 0,
             days: [],
             done: [],
-            nextCheckpoint: 0,
+            nextCheckpoint: {
+                ts: 0,
+                id: -1,
+            },
+            nextDone: 0,
         },
         second: {
             name: '',
@@ -16,7 +20,11 @@ const defaultState = {
             color: 0,
             days: [],
             done: [],
-            nextCheckpoint: 0,
+            nextCheckpoint: {
+                ts: 0,
+                id: -1,
+            },
+            nextDone: 0,
         },
         third: {
             name: '',
@@ -24,10 +32,14 @@ const defaultState = {
             color: 0,
             days: [],
             done: [],
-            nextCheckpoint: 0,
+            nextCheckpoint: {
+                ts: 0,
+                id: -1,
+            },
+            nextDone: 0,
         },
     },
-    nextDone: 0,
+    nextDoneTotal: 0,
     archive: [],
 };
 
@@ -64,7 +76,58 @@ const deletePath = async (userId, data) => {
 const setDone = async (userId, data) => {
     const user = await firebase.read(userId, defaultState);
     const { pathName, timezoneOffset } = data;
+    const newUser = setDoneForUser(user, pathName, timezoneOffset);
+    return await firebase.save(userId, newUser);
+};
 
+const generateDemo = async (userId, data) => {
+    const user = await firebase.read(userId, defaultState);
+    const newUser = generateDemoForUser(user, data.timezoneOffset);
+    return await firebase.save(userId, newUser);
+};
+
+const generateDemoForUser = (user, timezoneOffset) => {
+    // create new date
+    let date = new Date();
+    const serverOffset = -date.getTimezoneOffset();
+    const newDifference = (timezoneOffset - serverOffset) * 60000;
+
+    // move to server timezone
+    date = new Date(date.getTime() + newDifference);
+    date.setHours(0, 0, 0, 0);
+    let dow = dayOfWeek(date);
+
+    // first path create
+    user.paths.first = Object.assign({}, defaultState.paths.first);
+    writePath({ name: 'Езда на велосипеде', icon: '🚴‍♂️', days: [0,1,2,3,4,5,6], color: 0 }, user.paths.first);
+    const now = (new Date()).getTime();
+    const startFirst = now - 30 * 24 * 3600000;
+    for (let t = startFirst; t <= now - 24 * 3600000; t += 24 * 3600000) {
+        user = setDoneForUser(user, 'first', timezoneOffset, t);
+    }
+
+    // second path create
+    const daysSecond = dow === 4 ? [1,3] : [2,4];
+    user.paths.second = Object.assign({}, defaultState.paths.second);
+    writePath({ name: 'Игра на гитаре', icon: '🎸', days: daysSecond, color: 77 }, user.paths.second);
+    const startSecond = now - 21 * 24 * 3600000;
+    let counter = 0;
+    for (let tt = startSecond; tt <= now; tt += 24 * 3600000) {
+        const sDate = new Date(tt + newDifference);
+        sDate.setHours(0, 0, 0, 0);
+        let sDow = dayOfWeek(sDate);
+        if (daysSecond.includes(sDow)) {
+            counter++;
+            if (counter === 3) continue;
+        }
+        user = setDoneForUser(user, 'second', timezoneOffset, tt);
+    }
+    user.nextDoneTotal = 0;
+
+    return user;
+};
+
+const setDoneForUser = (user, pathName, timezoneOffset, forceTimestamp) => {
     // validate data
     if (!Object.prototype.hasOwnProperty.call(user.paths, pathName)) return user;
     if (!user.paths[pathName].name) return user;
@@ -72,7 +135,7 @@ const setDone = async (userId, data) => {
     if (Number.isNaN(offset) || offset < -720 || offset > 840) return user;
 
     // create new date
-    let date = new Date();
+    let date = forceTimestamp ? new Date(forceTimestamp) : new Date();
     const serverOffset = -date.getTimezoneOffset();
     const newDifference = (offset - serverOffset) * 60000;
 
@@ -105,7 +168,7 @@ const setDone = async (userId, data) => {
         const prevIndex = days.indexOf(prevDow);
         const nextIndex = days.indexOf(dow);
         const dontBreak = (prevIndex === nextIndex - 1 || (prevIndex === days.length - 1 && nextIndex === 0))
-          && userTimestamp - prevTs.ts <= 7 * 24 * 3600000;
+            && userTimestamp - prevTs.ts <= 7 * 24 * 3600000;
 
         // modify done object
         if (!dontBreak) {
@@ -116,7 +179,15 @@ const setDone = async (userId, data) => {
     }
 
     done.push(newDone);
-    user.nextDone = toDayOf(user.paths[pathName].days, date.getTime() + 24 * 3600000) - newDifference;
+
+    // set next done timestamp for notifications
+    user.paths[pathName].nextDone = toDayOf(user.paths[pathName].days, date.getTime() + 24 * 3600000) - newDifference;
+    const allDone = Object.values(user.paths).filter(p => p.nextDone > 0).map(p => p.nextDone);
+    if (allDone.length > 0) {
+        user.nextDoneTotal = Math.min(...allDone);
+    } else {
+        user.nextDoneTotal = 0;
+    }
 
     // checkpoint
     const [cpId, nextCheckpoint] = getCheckpointId(user.paths[pathName], userDate, newDifference);
@@ -124,9 +195,8 @@ const setDone = async (userId, data) => {
         newDone.checkpoint = cpId;
     }
 
-    user.paths[pathName].nextCheckpoint = nextCheckpoint;
-
-    return await firebase.save(userId, user);
+    user.paths[pathName].nextCheckpoint = Object.assign({}, nextCheckpoint);
+    return user;
 };
 
 const writePath = (newPath, userPath) => {
@@ -154,7 +224,7 @@ const dayOfWeek = (date) => {
 };
 
 const getCheckpointId = (path, date, difference) => {
-    if (path.done.length === 0) return [-1, 0];
+    if (path.done.length === 0) return [-1, {ts:0,id:-1}];
     let startDay = null;
     for (let index = path.done.length - 1; index >= 0; index--) {
         if (path.done[index].start) {
@@ -163,7 +233,7 @@ const getCheckpointId = (path, date, difference) => {
         }
     }
 
-    if (startDay === null) return [-1, 0];
+    if (startDay === null) return [-1, {ts:0,id:-1}];
     const daysDifference = Math.floor((date.getTime() - startDay.ts) / (24 * 3600000));
     const checkpointsGot = new Set(path.done.filter(d => d.checkpoint > 0).map(d => d.checkpoint));
 
@@ -174,7 +244,7 @@ const getCheckpointId = (path, date, difference) => {
     );
 
     if (checkpointIndex === -1) {
-        return [-1, 0];
+        return [-1, {ts:0,id:-1}];
     }
 
     let checkpoint = checkpoints[checkpointIndex];
@@ -183,16 +253,16 @@ const getCheckpointId = (path, date, difference) => {
         checkpointId = checkpoint.id;
         checkpointIndex++;
         if (checkpointIndex > checkpoints.length - 1) {
-            return [checkpointId, 0];
+            return [checkpointId, {ts:0,id:-1}];
         }
         checkpoint = checkpoints[checkpointIndex];
     }
 
     // find next checkpoint
-    let nextDone = startDay.ts + 24 * 3600000 * checkpoint.daysDone + difference;
-    nextDone = toDayOf(path.days, nextDone) - difference;
+    let nextCheckpointTs = startDay.ts + 24 * 3600000 * checkpoint.daysDone + difference;
+    nextCheckpointTs = toDayOf(path.days, nextCheckpointTs) - difference;
 
-    return [checkpointId, nextDone];
+    return [checkpointId, { ts: nextCheckpointTs, id: checkpoint.id }];
 };
 
 const toDayOf = (days, timestamp) => {
@@ -291,4 +361,5 @@ module.exports = {
     deletePath,
     setDone,
     getUser,
+    generateDemo,
 };

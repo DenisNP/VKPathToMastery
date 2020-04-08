@@ -9,51 +9,78 @@
                 today: day.today,
                 first: day.first,
             }"
+        @click="showToast"
     >
         <div class="day-text">{{day.day}}</div>
-        <div v-if="day.paths.first.done" class="container">
+        <div v-if="day.paths.first.done && !day.paths.first.checkpoint" class="container"
+             :style="firstFilter"
+        >
             <div class="sub-container">
                 <div class="icon first-done"></div>
             </div>
         </div>
-        <div v-if="day.paths.first.prev" class="container">
+        <div v-if="day.paths.first.prev" class="container" :style="firstFilter">
             <div class="sub-container">
                 <div class="icon first-line-back"></div>
             </div>
         </div>
-        <div v-if="day.paths.first.next" class="container">
+        <div v-if="day.paths.first.next" class="container" :style="firstFilter">
             <div class="sub-container">
                 <div class="icon first-line-next"></div>
             </div>
         </div>
-        <div v-if="day.paths.second.done" class="container">
+        <div v-if="day.paths.first.checkpoint" class="container" :style="firstFilter">
+            <div class="sub-container">
+                <div class="icon first-milestone"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.second.done && !day.paths.second.checkpoint" class="container"
+             :style="secondFilter"
+        >
             <div class="sub-container">
                 <div class="icon second-done"></div>
             </div>
         </div>
-        <div v-if="day.paths.second.prev" class="container">
+        <div v-if="day.paths.second.prev" class="container" :style="secondFilter">
             <div class="sub-container">
                 <div class="icon second-line-back"></div>
             </div>
         </div>
-        <div v-if="day.paths.second.next" class="container">
+        <div v-if="day.paths.second.next" class="container" :style="secondFilter">
             <div class="sub-container">
                 <div class="icon second-line-next"></div>
             </div>
         </div>
-        <div v-if="day.paths.third.done" class="container">
+        <div v-if="day.paths.second.checkpoint" class="container" :style="secondFilter">
+            <div class="sub-container">
+                <div class="icon second-milestone"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.third.done && !day.paths.third.checkpoint" class="container"
+             :style="thirdFilter"
+        >
             <div class="sub-container">
                 <div class="icon third-done"></div>
             </div>
         </div>
-        <div v-if="day.paths.third.prev" class="container">
+        <div v-if="day.paths.third.prev" class="container" :style="thirdFilter">
             <div class="sub-container">
                 <div class="icon third-line-back"></div>
             </div>
         </div>
-        <div v-if="day.paths.third.next" class="container">
+        <div v-if="day.paths.third.next" class="container" :style="thirdFilter">
             <div class="sub-container">
                 <div class="icon third-line-next"></div>
+            </div>
+        </div>
+        <div v-if="day.paths.third.checkpoint" class="container" :style="thirdFilter">
+            <div class="sub-container">
+                <div class="icon third-milestone"></div>
+            </div>
+        </div>
+        <div v-if="nextCheckpoints.length" class="container next-checkpoints">
+            <div class="sub-container">
+                <div class="icon first-milestone"></div>
             </div>
         </div>
     </div>
@@ -61,6 +88,7 @@
 
 <script>
 import EventBus from '../event-bus';
+import { numPhrase } from '../utils';
 
 export default {
     name: 'CalendarDay.vue',
@@ -70,12 +98,58 @@ export default {
             required: true,
         },
     },
+    computed: {
+        firstFilter() {
+            return `filter: hue-rotate(${this.$store.state.user.paths.first.color}deg);`;
+        },
+        secondFilter() {
+            return `filter: hue-rotate(${this.$store.state.user.paths.second.color}deg);`;
+        },
+        thirdFilter() {
+            return `filter: hue-rotate(${this.$store.state.user.paths.third.color}deg);`;
+        },
+        nextCheckpoints() {
+            return Object.entries(this.$store.state.user.paths)
+                .filter(([, p]) => p.nextCheckpoint && (p.nextCheckpoint.ts === this.day.timestamp))
+                .map(([pName, p]) => [pName, p.nextCheckpoint.id]);
+        },
+    },
     methods: {
         scroll() {
             if (!this.day.aWeekAgo) return;
             this.$nextTick(() => {
-                this.$refs.scrollDay.scrollIntoView();
+                if (this.$refs.scrollDay) this.$refs.scrollDay.scrollIntoView();
             });
+        },
+        findCheckpointDays(cId) {
+            const cp = this.$store.state.checkpoints.find((c) => c.id === cId);
+            return `${cp.daysDone} ${numPhrase(cp.daysDone, 'день', 'дня', 'дней')}`;
+        },
+        getCheckpointText(pathName, checkpointId) {
+            return `${this.$store.state.user.paths[pathName].name} — ${this.findCheckpointDays(checkpointId)}`;
+        },
+        showToast() {
+            const nameDayPairs = this.nextCheckpoints
+                .map(([pName, cId]) => this.getCheckpointText(pName, cId));
+
+            Object.entries(this.day.paths).forEach(([pName, pDay]) => {
+                if (pDay.checkpoint) {
+                    nameDayPairs.push(this.getCheckpointText(pName, pDay.checkpoint));
+                }
+            });
+
+            if (nameDayPairs.length === 0) return;
+
+            let toastMessage = 'Веха на вашем Пути:<br><br>';
+            toastMessage += nameDayPairs.join('<br>');
+
+            const toast = this.$f7.toast.create({
+                text: toastMessage,
+                position: 'center',
+                closeTimeout: 3000,
+                destroyOnClose: true,
+            });
+            toast.open();
         },
     },
     mounted() {
@@ -120,6 +194,10 @@ export default {
         width: 14vw;
         overflow: hidden;
         transform: translate(calc(-10px - 50%), -50%);
+    }
+
+    .next-checkpoints {
+        filter: brightness(0.5) opacity(0.7);
     }
 
     .icon {

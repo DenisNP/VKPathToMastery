@@ -29,6 +29,20 @@ export default {
             },
         };
     },
+    computed: {
+        isLoading() {
+            return this.$store.state.isLoading;
+        },
+    },
+    watch: {
+        isLoading(newState) {
+            if (newState) {
+                this.$f7.dialog.preloader('');
+            } else {
+                this.$f7.dialog.close();
+            }
+        },
+    },
     async mounted() {
         window.addEventListener('contextmenu', (e) => { e.preventDefault(); });
         await this.$store.dispatch('init');

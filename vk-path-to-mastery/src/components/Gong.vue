@@ -13,10 +13,19 @@
         <div v-if="pathExists && canBeDone" class="fill-frame">
             <div class="fill" :style="`transform: translateY(${43 * (0.6 - progress * 0.6)}vw);`"/>
         </div>
+        <div style="height: 0; width: 0; display: block;">
+            <img ref="cid1" src="~@/assets/sticker_days_3.png"/>
+            <img ref="cid2" src="~@/assets/sticker_weeks_1.png"/>
+            <img ref="cid3" src="~@/assets/sticker_weeks_2.png"/>
+            <img ref="cid4" src="~@/assets/sticker_weeks_3.png"/>
+            <img ref="cid5" src="~@/assets/sticker_weeks_4.png"/>
+        </div>
     </div>
 </template>
 
 <script>
+import { numPhrase } from '../utils';
+
 export default {
     name: 'Gong.vue',
     data() {
@@ -53,6 +62,18 @@ export default {
                 brightness = (1 - (dist / 40)) * 0.7 + 1;
             }
             return `hue-rotate(${c}deg) brightness(${brightness}) ${this.canBeDone ? '' : 'saturate(0.4)'}`;
+        },
+        lastDone() {
+            if (this.path.done.length === 0) return null;
+            return this.path.done[this.path.done.length - 1];
+        },
+    },
+    watch: {
+        lastDone(newLd, oldLd) {
+            if (newLd == null) return;
+            if ((oldLd == null || !oldLd.checkpoint) && newLd.checkpoint) {
+                this.drawImage();
+            }
         },
     },
     props: {
@@ -114,7 +135,8 @@ export default {
             this.showToast();
         },
         clickedDouble() {
-            this.edit();
+            // this.edit();
+            this.drawImage();
         },
         setDone() {
             this.touchStartTime = 0;
@@ -145,6 +167,24 @@ export default {
             if (this.progress > 1) {
                 this.setDone();
             }
+        },
+        drawImage() {
+            if (!this.lastDone.checkpoint) return;
+            const cid = this.lastDone.checkpoint;
+            const cpDays = this.$store.state.checkpoints.find((cp) => cp.id === cid).daysDone;
+
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(this.$refs[`cid${cid}`], 0, 0);
+
+            context.font = '30px Arial';
+            context.textAlign = 'center';
+            context.fillText(this.path.name, canvas.width / 2, 150);
+            context.font = 'bold 34px Arial';
+            context.fillText(`${cpDays} ${numPhrase(cpDays, 'день', 'дня', 'дней')} непрерывно!`, canvas.width / 2, 220);
+
+            // const imageData = canvas.toDataURL();
         },
     },
 };
