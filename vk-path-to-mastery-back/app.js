@@ -22,35 +22,35 @@ app.get('/test', async (req, res) => {
 
 app.post('/getUser/:userId', async (req, res) => {
     res.header('Content-Type', 'application/json');
-    if (!checkParams(req.body)) res.send('{}');
+    if (!checkParams(req.body, req.params.userId)) res.send('{}');
     else res.send(await handler.getUser(req.params.userId));
 });
 
 app.post('/createEditPath/:userId', async (req, res) => {
     res.header('Content-Type', 'application/json');
-    if (!checkParams(req.body)) res.send('{}');
+    if (!checkParams(req.body, req.params.userId)) res.send('{}');
     else res.send(await handler.createEditPath(req.params.userId, req.body));
 });
 
 app.post('/deletePath/:userId', async (req, res) => {
     res.header('Content-Type', 'application/json');
-    if (!checkParams(req.body)) res.send('{}');
+    if (!checkParams(req.body, req.params.userId)) res.send('{}');
     else res.send(await handler.deletePath(req.params.userId, req.body));
 });
 
 app.post('/setDone/:userId', async (req, res) => {
     res.header('Content-Type', 'application/json');
-    if (!checkParams(req.body)) res.send('{}');
+    if (!checkParams(req.body, req.params.userId)) res.send('{}');
     else res.send(await handler.setDone(req.params.userId, req.body));
 });
 
 app.post('/generateDemo/:userId', async (req, res) => {
     res.header('Content-Type', 'application/json');
-    if (!checkParams(req.body)) res.send('{}');
+    if (!checkParams(req.body, req.params.userId)) res.send('{}');
     else res.send(await handler.generateDemo(req.params.userId, req.body));
 });
 
-const checkParams = ({ params, userId }) => {
+const checkParams = ({ params }, userId) => {
     const urlParams = qs.parse(params);
     const ordered = {};
     Object.keys(urlParams).sort().forEach((key) => {
