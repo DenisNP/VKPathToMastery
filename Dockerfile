@@ -1,7 +1,7 @@
 # build client
 FROM node:10 as BUILD_CLIENT
 COPY ./vk-path-to-mastery ./app
-WORKDIP ./app
+WORKDIR ./app
 RUN npm install
 RUN npm run build
 
