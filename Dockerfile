@@ -8,7 +8,7 @@ RUN npm run build
 # run server
 FROM node:10
 COPY --from=BUILD_CLIENT /app/dist /app/dist
-COPY ./vk-path-to-mastery-back ./app
+COPY ./vk-path-to-mastery-back /app
 
 # run
 WORKDIR /app
