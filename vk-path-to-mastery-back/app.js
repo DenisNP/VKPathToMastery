@@ -11,6 +11,9 @@ app.use(express.json());
 app.use(cors());
 handler.init();
 
+// static
+app.use('/', express.static(path.join(__dirname, 'dist')));
+
 // requests
 app.get('/test', async (req, res) => {
     res.send('It works!');
