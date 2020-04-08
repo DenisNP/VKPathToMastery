@@ -9,6 +9,7 @@ RUN npm run build
 FROM node:10
 COPY --from=BUILD_CLIENT /app/dist /app/dist
 COPY ./vk-path-to-mastery-back /app
+RUN npm install
 
 # run
 WORKDIR /app
