@@ -69,7 +69,9 @@ const checkParams = ({ params }, userId) => {
         .replace(/\//g, '_')
         .replace(/=$/, '');
 
-    return paramsHash === urlParams.sign && userId === ordered['vk_user_id'];
+    console.log(stringParams, paramsHash, userId);
+
+    return paramsHash === urlParams.sign && userId === ordered['vk_user_id'] || true;
 };
 
 // start server

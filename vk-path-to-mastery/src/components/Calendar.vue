@@ -50,6 +50,7 @@ export default {
     .calendar-container {
         height: calc(100vh - var(--f7-navbar-height) - var(--f7-safe-area-top) - 34.9vw);
         overflow-y: scroll;
+        overflow-x: hidden;
     }
 
     .bar {
