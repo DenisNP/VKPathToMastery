@@ -8,6 +8,7 @@
 import Calendar from './components/Calendar.vue';
 import CreatePath from './components/CreatePath.vue';
 import EventBus from './event-bus';
+import bridge from '@vkontakte/vk-bridge';
 
 export default {
     data() {
@@ -45,6 +46,8 @@ export default {
     },
     async mounted() {
         window.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+        bridge.send('VKWebAppInit');
+
         await this.$store.dispatch('init');
         this.$nextTick(() => {
             EventBus.$emit('scroll');

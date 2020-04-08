@@ -56,7 +56,7 @@ const api = async (method, userId, data) => {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ ...data, params: window.location.search }),
         });
 
         // noinspection UnnecessaryLocalVariableJS
@@ -239,7 +239,8 @@ export default new Vuex.Store({
     },
     actions: {
         async init({ state, commit }) {
-            const userId = '55555';
+            const params = new URLSearchParams(window.location.search);
+            const userId = params.get('vk_user_id');
             commit('setUserId', userId);
 
             commit('setLoading', true);
